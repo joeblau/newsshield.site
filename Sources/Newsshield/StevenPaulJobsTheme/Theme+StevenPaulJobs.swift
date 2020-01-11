@@ -30,22 +30,10 @@ private struct FoundationHTMLFactory<Site: Website>: HTMLFactory {
             .head(for: index, on: context.site),
             .body(
                 .hero(for: context, selectedSection: nil),
-                .wrapper(
-                    .h1(.text(index.title)),
-                    .p(
-                        .class("description"),
-                        .text(context.site.description)
-                    ),
-                    .h2("Latest BLOOP"),
-                    .itemList(
-                        for: context.allItems(
-                            sortedBy: \.date,
-                            order: .descending
-                        ),
-                        on: context.site
+                .main(
+                    .brands(for: context.site),
+                    .footer(for: context.site)
                     )
-                ),
-                .footer(for: context.site)
             )
         )
     }
@@ -199,17 +187,15 @@ private extension Node where Context == HTML.BodyContext {
         let newsshield = context.site as! Newsshield
         print(newsshield.download)
         return header(
-            .section(
-                .class("hero hero-background"),
-                .h1(.text(context.site.name)),
-                .a(
-                    .href(newsshield.download.appStoreURL),
-                    .text(newsshield.download.title)
-                ),
-                .div(
-                    .img(
-                        .src("/img/dark/nytimes-hero.png")
-                    )
+            .class("hero hero-background"),
+            .h1(.text(context.site.name)),
+            .a(
+                .href(newsshield.download.appStoreURL),
+                .text(newsshield.download.title)
+            ),
+            .div(
+                .img(
+                    .src("/img/dark/nytimes-hero.png")
                 )
             )
         )
@@ -239,20 +225,59 @@ private extension Node where Context == HTML.BodyContext {
             ))
         })
     }
+    
+
+    static func brands<T: Website>(for site: T) -> Node {
+        let newsshield = site as! Newsshield
+        return .element(named: "", nodes: [
+        .header(
+             .h2(.text(newsshield.brands.title)),
+             .if(newsshield.brands.subtitle.isEmpty == false,
+                 .h4(.text(newsshield.brands.subtitle))
+             )
+         ),
+         .section(
+             .class("brands"),
+             .forEach(newsshield.brands.sources) { source in
+                 .div(
+                     .element(named: "picture", nodes: [
+                         .selfClosedElement(named: "source", attributes: [
+                             .attribute(named: "src", value: "/img/dark/source/\(source).png"),
+                             .attribute(named: "srcset", value: "/img/dark/source/\(source)@2x.png 2x"),
+                             .attribute(named: "media", value: "(prefers-color-scheme: dark)")
+                         ]),
+                         .selfClosedElement(named: "img", attributes: [
+                             .attribute(named: "class", value: "brand-image"),
+                             .attribute(named: "src", value: "/img/light/source/\(source).png"),
+                             .attribute(named: "srcset", value: "/img/light/source/\(source)@2x.png 2x")
+                         ])
+                     ])
+
+                 )
+             }
+             
+         )
+        
+        ])
+ 
+            
+        
+    }
 
     static func footer<T: Website>(for site: T) -> Node {
+        let newsshield = site as! Newsshield
         return .footer(
-            .p(
-                .text("Generated using "),
-                .a(
-                    .text("Publish"),
-                    .href("https://github.com/johnsundell/publish")
-                )
-            ),
-            .p(.a(
-                .text("RSS feed"),
-                .href("/feed.rss")
-            ))
+            .a(.href("/"), .text("Home")),
+            .text(" • "),
+            .a(.href("https://twitter.com/getshields"), .text("Twitter")),
+            .text(" • "),
+            .a(.href("https://instagram.com/getshields"), .text("Instagram")),
+            .text(" • "),
+            .a(.href("https://github.com/getshields"), .text("GitHub")),
+            .text(" • "),
+            .a(.href("/privacy"), .text("Privacy")),
+            .br(),
+            .element(named: "small", text: newsshield.copyright)
         )
     }
 }

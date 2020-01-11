@@ -14,6 +14,31 @@ struct Download {
     let state: DownloadState = .download
 }
 
+struct Brands {
+    let title = "Brands"
+    let subtitle = "Publications We Work With"
+    let sources = ["abc-news",
+                    "axios",
+                    "bbc",
+                    "business-insider",
+                    "buzzfeed-news",
+                    "cbs-news",
+                    "cnn",
+                    "fox-news-channel",
+                    "ft",
+                    "gizmodo",
+                    "huffpost",
+                    "jalopnik",
+                    "los-angeles-times",
+                    "new-york-post",
+                    "techcrunch",
+                    "the-guardian",
+                    "the-information-logo",
+                    "the-new-york-times",
+                    "the-washington-post",
+                    "yahoo!-news"]
+}
+
 // This type acts as the configuration for your website.
 struct Newsshield: Website {
     enum SectionID: String, WebsiteSectionID {
@@ -34,6 +59,7 @@ struct Newsshield: Website {
     var keywords = "Redact, Sensational, News, Shield, Desational"
     var copyright = "Copyright © 2019 - 2020 Get Shields"
     var download = Download()
+    let brands = Brands()
 }
 
 // This will generate your website using the built-in Foundation theme:

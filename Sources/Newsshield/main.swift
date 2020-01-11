@@ -130,7 +130,7 @@ struct Newsshield: Website {
     }
 
     // Update these properties to configure your website:
-    var url = URL(string: "https://your-website-url.com")!
+    var url = URL(string: "https://newsshield.app")!
     var name = "News Shield"
     var description = "Redact Sensational News"
     var language: Language { .english }

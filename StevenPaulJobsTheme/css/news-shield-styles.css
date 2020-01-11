@@ -1,0 +1,17 @@
+@media (prefers-color-scheme:dark) {
+  .hero-background {
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.2),rgba(0, 0, 0, 0.2)), url(../img/catalina/night.jpg);
+  }
+}
+
+@media (prefers-color-scheme:light) {
+  .hero-background {
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.2),rgba(255, 255, 255, 0.2)),  url(../img/catalina/sunny.jpg);
+  }
+}

@@ -94,8 +94,8 @@ struct Features {
 }
 
 struct Brands {
-    let title = "Brands"
-    let subtitle = "Publications We Work With"
+    let title = "Sources"
+    let subtitle = "Publications we work with"
     let sources = ["abc-news",
                     "axios",
                     "bbc",

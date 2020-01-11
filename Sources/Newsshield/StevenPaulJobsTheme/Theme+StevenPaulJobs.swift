@@ -41,6 +41,7 @@ private struct FoundationHTMLFactory<Site: Website>: HTMLFactory {
             .body(
                 .hero(for: context.site),
                 .main(
+                    .technology(for: context.site),
                     .features(for: context.site),
                     .brands(for: context.site),
                     .download(for: context.site),
@@ -232,7 +233,37 @@ private extension Node where Context == HTML.BodyContext {
         )
     }
     
-    
+    static func technology<T: Website>(for site: T) -> Node {
+        return .element(named: "", nodes: [
+            .header(
+                .h2(.text(site.technology.title)),
+                .if(site.technology.subtitle.isEmpty == false,
+                    .h4(.text(site.technology.subtitle))
+                )
+            ),
+            .section(
+                .class("technology"),
+                .forEach(site.technology.features) { feature in
+                    .div(
+                        .class("well"),
+                        .h2(
+                            .element(named: "mark", nodes: [
+                                .class("span-red icon"),
+                                .text(feature.symbol)
+                            ])
+                        ),
+                        .p(
+                            .strong(
+                                .class("system-red"),
+                                .text(feature.title)
+                            ),
+                            .text(" \(feature.description)")
+                        )
+                    )
+                }
+            )
+        ])
+    }
     
     static func features<T: Website>(for site: T) -> Node {
         return .element(named: "", nodes: [

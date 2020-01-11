@@ -114,18 +114,33 @@ private extension Node where Context == HTML.BodyContext {
         )
     }
     
+    // MARK: Hero
+    
     static func hero<T: Website>(for site: T) -> Node {
-        return header(
+        return section(
             .class("hero hero-background"),
             .h1(.text(site.name)),
             .appStoreLink(for: site),
             .div(
-                .img(
-                    .src("/img/dark/nytimes-hero.png")
-                )
+                .element(named: "picture", nodes: [
+                    .selfClosedElement(named: "source", attributes: [
+                        .attribute(named: "class", value: "hero-image"),
+                        .attribute(named: "src", value: "/img/dark/nytimes-hero.png"),
+                        .attribute(named: "srcset", value: "/img/dark/nytimes-hero@2x.png 2x"),
+                        .attribute(named: "media", value: "(prefers-color-scheme: dark)")
+                    ]),
+                    .selfClosedElement(named: "img", attributes: [
+                        .attribute(named: "class", value: "hero-image"),
+                        .attribute(named: "src", value: "/img/light/nytimes-hero.png"),
+                        .attribute(named: "srcset", value: "/img/light/nytimes-hero@2x.png 2x")
+                    ])
+                ])
+                
             )
         )
     }
+    
+    // MARK: Why
     
     static func why<T: Website>(for site: T) -> Node {
         return .section(
@@ -141,6 +156,8 @@ private extension Node where Context == HTML.BodyContext {
             )
         )
     }
+    
+    // MARK: How
     
     static func how<T: Website>(for site: T) -> Node {
         return .element(named: "", nodes: [
@@ -170,6 +187,8 @@ private extension Node where Context == HTML.BodyContext {
             )
         ])
     }
+    
+    // MARK: Technology
     
     static func technology<T: Website>(for site: T) -> Node {
         return .element(named: "", nodes: [
@@ -203,6 +222,8 @@ private extension Node where Context == HTML.BodyContext {
         ])
     }
     
+    // MARK: Features
+    
     static func features<T: Website>(for site: T) -> Node {
         return .element(named: "", nodes: [
             .header(
@@ -234,6 +255,8 @@ private extension Node where Context == HTML.BodyContext {
         ])
     }
     
+    // MARK: Brands
+    
     static func brands<T: Website>(for site: T) -> Node {
         return .element(named: "", nodes: [
             .header(
@@ -248,6 +271,7 @@ private extension Node where Context == HTML.BodyContext {
                     .div(
                         .element(named: "picture", nodes: [
                             .selfClosedElement(named: "source", attributes: [
+                                .attribute(named: "class", value: "brand-image"),
                                 .attribute(named: "src", value: "/img/dark/source/\(source).png"),
                                 .attribute(named: "srcset", value: "/img/dark/source/\(source)@2x.png 2x"),
                                 .attribute(named: "media", value: "(prefers-color-scheme: dark)")
@@ -265,6 +289,8 @@ private extension Node where Context == HTML.BodyContext {
         ])
     }
     
+    // MARK: Download
+    
     static func download<T: Website>(for site: T) -> Node {
         return .element(named: "", nodes: [
             .header(
@@ -281,6 +307,8 @@ private extension Node where Context == HTML.BodyContext {
             )
         ])
     }
+    
+    // MARK: Footer
     
     static func footer<T: Website>(for site: T) -> Node {
         return .footer(

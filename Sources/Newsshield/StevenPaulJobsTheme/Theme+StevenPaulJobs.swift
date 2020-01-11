@@ -10,6 +10,7 @@ import Plot
 
 enum PublishError: Error {
     case castSiteError
+    case notImplemented
 }
 
 public extension Theme {
@@ -41,157 +42,47 @@ private struct FoundationHTMLFactory<Site: Website>: HTMLFactory {
             .body(
                 .hero(for: context.site),
                 .main(
+                    .why(for: context.site),
+                    .how(for: context.site),
                     .technology(for: context.site),
                     .features(for: context.site),
                     .brands(for: context.site),
-                    .download(for: context.site),
-                    .footer(for: context.site)
-                )
+                    .download(for: context.site)
+                ),
+                .footer(for: context.site)
             )
         )
     }
     
     func makeSectionHTML(for section: Section<Site>,
                          context: PublishingContext<Site>) throws -> HTML {
-        HTML(
-            .lang(context.site.language),
-            .head(for: section, on: context.site),
-            .body(
-                .header(for: context, selectedSection: section.id),
-                .wrapper(
-                    .h1(.text(section.title)),
-                    .itemList(for: section.items, on: context.site)
-                ),
-                .footer(for: context.site)
-            )
-        )
+        return HTML()
     }
     
     func makeItemHTML(for item: Item<Site>,
                       context: PublishingContext<Site>) throws -> HTML {
-        HTML(
-            .lang(context.site.language),
-            .head(for: item, on: context.site),
-            .body(
-                .class("item-page"),
-                .header(for: context, selectedSection: item.sectionID),
-                .wrapper(
-                    .article(
-                        .div(
-                            .class("content"),
-                            .contentBody(item.body)
-                        ),
-                        .span("Tagged with: "),
-                        .tagList(for: item, on: context.site)
-                    )
-                ),
-                .footer(for: context.site)
-            )
-        )
+        return HTML()
     }
     
     func makePageHTML(for page: Page,
                       context: PublishingContext<Site>) throws -> HTML {
-        HTML(
-            .lang(context.site.language),
-            .head(for: page, on: context.site),
-            .body(
-                .header(for: context, selectedSection: nil),
-                .wrapper(
-                    
-                ),
-                .footer(for: context.site)
-            )
-        )
+        return HTML()
     }
     
     func makeTagListHTML(for page: TagListPage,
                          context: PublishingContext<Site>) throws -> HTML? {
-        HTML(
-            .lang(context.site.language),
-            .head(for: page, on: context.site),
-            .body(
-                .header(for: context, selectedSection: nil),
-                .wrapper(
-                    .h1("Browse all tags"),
-                    .ul(
-                        .class("all-tags"),
-                        .forEach(page.tags.sorted()) { tag in
-                            .li(
-                                .class("tag"),
-                                .a(
-                                    .href(context.site.path(for: tag)),
-                                    .text(tag.string)
-                                )
-                            )
-                        }
-                    )
-                ),
-                .footer(for: context.site)
-            )
-        )
+        return HTML()
     }
     
     func makeTagDetailsHTML(for page: TagDetailsPage,
                             context: PublishingContext<Site>) throws -> HTML? {
-        HTML(
-            .lang(context.site.language),
-            .head(for: page, on: context.site),
-            .body(
-                .header(for: context, selectedSection: nil),
-                .wrapper(
-                    .h1(
-                        "Tagged with ",
-                        .span(.class("tag"), .text(page.tag.string))
-                    ),
-                    .a(
-                        .class("browse-all"),
-                        .text("Browse all tags"),
-                        .href(context.site.tagListPath)
-                    ),
-                    .itemList(
-                        for: context.items(
-                            taggedWith: page.tag,
-                            sortedBy: \.date,
-                            order: .descending
-                        ),
-                        on: context.site
-                    )
-                ),
-                .footer(for: context.site)
-            )
-        )
+        return HTML()
     }
 }
 
 private extension Node where Context == HTML.BodyContext {
     static func wrapper(_ nodes: Node...) -> Node {
         .div(.class("wrapper"), .group(nodes))
-    }
-    
-    static func itemList<T: Website>(for items: [Item<T>], on site: T) -> Node {
-        return .ul(
-            .class("item-list"),
-            .forEach(items) { item in
-                .li(.article(
-                    .h1(.a(
-                        .href(item.path),
-                        .text(item.title)
-                        )),
-                    .tagList(for: item, on: site),
-                    .p(.text(item.description))
-                    ))
-            }
-        )
-    }
-    
-    static func tagList<T: Website>(for item: Item<T>, on site: T) -> Node {
-        return .ul(.class("tag-list"), .forEach(item.tags) { tag in
-            .li(.a(
-                .href(site.path(for: tag)),
-                .text(tag.string)
-                ))
-            })
     }
     
     // MARK: - Site
@@ -208,12 +99,15 @@ private extension Node where Context == HTML.BodyContext {
                 .if(sectionIDs.count > 1,
                     .nav(
                         .ul(.forEach(sectionIDs) { section in
-                            .li(.a(
-                                .class(section == selectedSection ? "selected" : ""),
-                                .href(context.sections[section].path),
-                                .text(context.sections[section].title)
-                                ))
-                            })
+                            .li(
+                                .a(
+                                    .class(section == selectedSection ? "selected" : ""),
+                                    .href(context.sections[section].path),
+                                    .text(context.sections[section].title)
+                                )
+                            )
+                            }
+                        )
                     )
                 )
             )
@@ -231,6 +125,50 @@ private extension Node where Context == HTML.BodyContext {
                 )
             )
         )
+    }
+    
+    static func why<T: Website>(for site: T) -> Node {
+        return .section(
+            .class("why"),
+            .header(
+                .h4(.text(site.why.title))
+            ),
+            .div(
+                .class("max-section"),
+                .forEach(site.why.paragraphs) { paragraph in
+                    .p(.text(paragraph))
+                }
+            )
+        )
+    }
+    
+    static func how<T: Website>(for site: T) -> Node {
+        return .element(named: "", nodes: [
+            .header(
+                .h2(.text(site.how.title)),
+                .if(site.how.subtitle.isEmpty == false,
+                    .h4(.text(site.how.subtitle))
+                )
+            ),
+            
+            .section(
+                .class("how max-section"),
+                .forEach(site.how.steps) { step in
+                    .div(
+                        .class("well"),
+                        .img(
+                            .class("how-image"),
+                            .src("/img/\(step.image).svg")
+                        ),
+                        .h4(
+                            .text(step.title),
+                            .br(),
+                            .element(named: "small", nodes: [.text(step.description)])
+                        )
+                    )
+                }
+            )
+        ])
     }
     
     static func technology<T: Website>(for site: T) -> Node {

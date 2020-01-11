@@ -14,18 +14,47 @@ enum DownloadState: CustomStringConvertible {
     }
 }
 
-struct Download {
-    let title = "Download"
-    let subtitle = "Get News Shield for Safari on macOS"
-    let appStoreURL = "https://apps.apple.com/us/app/news-shield/id1489025442?ls=1&mt=12"
-    let state: DownloadState = .download
-}
-
 struct BulletPoint {
     let symbol: String
     let title: String
     let description: String
     var href: String? = nil
+}
+
+struct Step {
+    let image: String
+    let title: String
+    let description: String
+}
+
+struct Why {
+    let title = "We Need Better Journalism"
+    let paragraphs = [
+        "Today’s social media landscape has seen an increasing number of content producers. Social media platforms are competing engagement time away from news outlets as consumers access more information and entertainment online. News is a business that relies on engagement to make a profit. To stay in business, news outlets are working hard to come up with different strategies.",
+        "One strategy has been that of publishing factual yet sensational headlines and phrases. These headlines and phrases are often designed to capture and arouse the reader, not to accurately reflect the news in the article. News Shield redacts sensational headlines and sentences from your browser, presenting the reader with only those sentences that are relevant to the story."
+    ]
+}
+
+struct How {
+    let title = "How It Works"
+    let subtitle = "Redacting sensational news"
+    let steps = [
+    Step(image: "separate",
+         title: "1. Separate",
+         description: "News Shield reads an article on a white-listed page and separates the article into individual sentences."),
+    Step(image: "classify",
+         title: "2. Classify",
+         description: "News Shield classifies each sentence as “News” or “Not News.”"),
+    Step(image: "redact",
+         title: "3. Redact",
+         description: "News Shield replaces the sentences classified as “Not News” with redacted block text.")]
+}
+
+struct Download {
+    let title = "Download"
+    let subtitle = "Get News Shield for Safari on macOS"
+    let appStoreURL = "https://apps.apple.com/us/app/news-shield/id1489025442?ls=1&mt=12"
+    let state: DownloadState = .download
 }
 
 struct Technology {
@@ -112,6 +141,8 @@ struct Newsshield: Website {
 extension Website {
     var keywords: String { "Redact, Sensational, News, Shield, Desational" }
     var copyright: String { "Copyright © 2019 - 2020 Get Shields" }
+    var why: Why { Why() }
+    var how: How { How() }
     var technology: Technology { Technology() }
     var features: Features { Features() }
     var brands: Brands { Brands() }

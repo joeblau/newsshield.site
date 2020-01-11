@@ -66,7 +66,31 @@ private struct FoundationHTMLFactory<Site: Website>: HTMLFactory {
     
     func makePageHTML(for page: Page,
                       context: PublishingContext<Site>) throws -> HTML {
-        return HTML()
+    return HTML(
+            .lang(context.site.language),
+            .head(for: page,
+                  on: context.site,
+                  titleSeparator: " | ",
+                  stylesheetPaths: ["styles.css",
+                                    "StevenPaulJobsTheme/css/news-shield-styles.css",
+                                    "StevenPaulJobsTheme/fonts/stylesheet.css"],
+                  rssFeedPath: .defaultForRSSFeed,
+                  rssFeedTitle: nil),
+            .body(
+                
+                .header(
+                    .h1(.text(page.title)),
+                    .h3(.text(page.description))
+                    ),
+                .main(
+                    .section(
+                        .class("max-section"),
+                        page.body.node
+                    )
+                ),
+                .footer(for: context.site)
+            )
+        )
     }
     
     func makeTagListHTML(for page: TagListPage,

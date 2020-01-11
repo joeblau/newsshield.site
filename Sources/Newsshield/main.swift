@@ -68,7 +68,6 @@ struct Technology {
                        title: "Machine Learning",
                        description: "uses the output from the Natural Language Processing (NLP) string as input into the Text Classifier. The Text Classifier identifies sentences as either News or Not News. The model is built using transfer learning with a dynamically embedded feature extractor. Sentences that are tagged as Not News are replaced with redacted blocks to obscure sensational content from the reader.")
     ]
-    
 }
 
 struct Features {

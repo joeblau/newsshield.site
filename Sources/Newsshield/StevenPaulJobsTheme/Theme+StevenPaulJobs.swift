@@ -43,6 +43,7 @@ private struct FoundationHTMLFactory<Site: Website>: HTMLFactory {
                 .main(
                     .features(for: context.site),
                     .brands(for: context.site),
+                    .download(for: context.site),
                     .footer(for: context.site)
                 )
             )
@@ -222,19 +223,7 @@ private extension Node where Context == HTML.BodyContext {
         return header(
             .class("hero hero-background"),
             .h1(.text(site.name)),
-            .a(
-                .href(site.download.appStoreURL),
-                .element(named: "picture", nodes: [
-                    .class("download-image"),
-                    .selfClosedElement(named: "source", attributes: [
-                        .attribute(named: "srcset", value: "/StevenPaulJobsTheme/img/\(site.download.state.description)-mac-app-store/us-uk/white.svg"),
-                        .attribute(named: "media", value: "(prefers-color-scheme: dark)")
-                    ]),
-                    .selfClosedElement(named: "img", attributes: [
-                        .attribute(named: "src", value: "/StevenPaulJobsTheme/img/\(site.download.state.description)-mac-app-store/us-uk/black.svg"),
-                    ])
-                ])
-            ),
+            .appStoreLink(for: site),
             .div(
                 .img(
                     .src("/img/dark/nytimes-hero.png")
@@ -307,6 +296,23 @@ private extension Node where Context == HTML.BodyContext {
         ])
     }
     
+    static func download<T: Website>(for site: T) -> Node {
+        return .element(named: "", nodes: [
+            .header(
+                .h2(.text(site.download.title)),
+                .if(site.download.subtitle.isEmpty == false,
+                    .h4(.text(site.download.subtitle))
+                )
+            ),
+            .section(
+                .class("downloads"),
+                .div(
+                    .appStoreLink(for: site)
+                )
+            )
+        ])
+    }
+    
     static func footer<T: Website>(for site: T) -> Node {
         return .footer(
             .a(.href("/"), .text("Home")),
@@ -320,6 +326,24 @@ private extension Node where Context == HTML.BodyContext {
             .a(.href("/privacy"), .text("Privacy")),
             .br(),
             .element(named: "small", text: site.copyright)
+        )
+    }
+    
+    //MARK: - Utility functions
+    
+    static func appStoreLink<T: Website>(for site: T) -> Node {
+        return .a(
+            .href(site.download.appStoreURL),
+            .element(named: "picture", nodes: [
+                .class("download-image"),
+                .selfClosedElement(named: "source", attributes: [
+                    .attribute(named: "srcset", value: "/StevenPaulJobsTheme/img/\(site.download.state.description)-mac-app-store/us-uk/white.svg"),
+                    .attribute(named: "media", value: "(prefers-color-scheme: dark)")
+                ]),
+                .selfClosedElement(named: "img", attributes: [
+                    .attribute(named: "src", value: "/StevenPaulJobsTheme/img/\(site.download.state.description)-mac-app-store/us-uk/black.svg"),
+                ])
+            ])
         )
     }
 }

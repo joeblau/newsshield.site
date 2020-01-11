@@ -8,6 +8,10 @@
 import Publish
 import Plot
 
+enum PublishError: Error {
+    case castSiteError
+}
+
 public extension Theme {
     /// The default "Foundation" theme that Publish ships with, a very
     /// basic theme mostly implemented for demonstration purposes.
@@ -15,8 +19,7 @@ public extension Theme {
         Theme(
             htmlFactory: FoundationHTMLFactory(),
             resourcePaths: [
-                "Resources/StevenPaulJobsTheme/css/styles.css",
-                "Resources/css/news-shield-styles.css"
+                "Resources/css/styles.css"
             ]
         )
     }
@@ -25,19 +28,27 @@ public extension Theme {
 private struct FoundationHTMLFactory<Site: Website>: HTMLFactory {
     func makeIndexHTML(for index: Index,
                        context: PublishingContext<Site>) throws -> HTML {
-        HTML(
+        return HTML(
             .lang(context.site.language),
-            .head(for: index, on: context.site),
+            .head(for: index,
+                  on: context.site,
+                  titleSeparator: " | ",
+                  stylesheetPaths: ["styles.css",
+                                    "StevenPaulJobsTheme/css/news-shield-styles.css",
+                                    "StevenPaulJobsTheme/fonts/stylesheet.css"],
+                  rssFeedPath: .defaultForRSSFeed,
+                  rssFeedTitle: nil),
             .body(
-                .hero(for: context, selectedSection: nil),
+                .hero(for: context.site),
                 .main(
+                    .features(for: context.site),
                     .brands(for: context.site),
                     .footer(for: context.site)
-                    )
+                )
             )
         )
     }
-
+    
     func makeSectionHTML(for section: Section<Site>,
                          context: PublishingContext<Site>) throws -> HTML {
         HTML(
@@ -53,7 +64,7 @@ private struct FoundationHTMLFactory<Site: Website>: HTMLFactory {
             )
         )
     }
-
+    
     func makeItemHTML(for item: Item<Site>,
                       context: PublishingContext<Site>) throws -> HTML {
         HTML(
@@ -76,7 +87,7 @@ private struct FoundationHTMLFactory<Site: Website>: HTMLFactory {
             )
         )
     }
-
+    
     func makePageHTML(for page: Page,
                       context: PublishingContext<Site>) throws -> HTML {
         HTML(
@@ -85,13 +96,13 @@ private struct FoundationHTMLFactory<Site: Website>: HTMLFactory {
             .body(
                 .header(for: context, selectedSection: nil),
                 .wrapper(
-
+                    
                 ),
                 .footer(for: context.site)
             )
         )
     }
-
+    
     func makeTagListHTML(for page: TagListPage,
                          context: PublishingContext<Site>) throws -> HTML? {
         HTML(
@@ -118,7 +129,7 @@ private struct FoundationHTMLFactory<Site: Website>: HTMLFactory {
             )
         )
     }
-
+    
     func makeTagDetailsHTML(for page: TagDetailsPage,
                             context: PublishingContext<Site>) throws -> HTML? {
         HTML(
@@ -155,13 +166,40 @@ private extension Node where Context == HTML.BodyContext {
     static func wrapper(_ nodes: Node...) -> Node {
         .div(.class("wrapper"), .group(nodes))
     }
-
+    
+    static func itemList<T: Website>(for items: [Item<T>], on site: T) -> Node {
+        return .ul(
+            .class("item-list"),
+            .forEach(items) { item in
+                .li(.article(
+                    .h1(.a(
+                        .href(item.path),
+                        .text(item.title)
+                        )),
+                    .tagList(for: item, on: site),
+                    .p(.text(item.description))
+                    ))
+            }
+        )
+    }
+    
+    static func tagList<T: Website>(for item: Item<T>, on site: T) -> Node {
+        return .ul(.class("tag-list"), .forEach(item.tags) { tag in
+            .li(.a(
+                .href(site.path(for: tag)),
+                .text(tag.string)
+                ))
+            })
+    }
+    
+    // MARK: - Site
+    
     static func header<T: Website>(
         for context: PublishingContext<T>,
         selectedSection: T.SectionID?
     ) -> Node {
         let sectionIDs = T.SectionID.allCases
-
+        
         return .header(
             .wrapper(
                 .a(.class("site-name"), .href("/"), .text(context.site.name)),
@@ -172,26 +210,30 @@ private extension Node where Context == HTML.BodyContext {
                                 .class(section == selectedSection ? "selected" : ""),
                                 .href(context.sections[section].path),
                                 .text(context.sections[section].title)
-                            ))
-                        })
+                                ))
+                            })
                     )
                 )
             )
         )
     }
     
-    static func hero<T: Website>(
-        for context: PublishingContext<T>,
-        selectedSection: T.SectionID?
-    ) -> Node {
-        let newsshield = context.site as! Newsshield
-        print(newsshield.download)
+    static func hero<T: Website>(for site: T) -> Node {
         return header(
             .class("hero hero-background"),
-            .h1(.text(context.site.name)),
+            .h1(.text(site.name)),
             .a(
-                .href(newsshield.download.appStoreURL),
-                .text(newsshield.download.title)
+                .href(site.download.appStoreURL),
+                .element(named: "picture", nodes: [
+                    .class("download-image"),
+                    .selfClosedElement(named: "source", attributes: [
+                        .attribute(named: "srcset", value: "/StevenPaulJobsTheme/img/\(site.download.state.description)-mac-app-store/us-uk/white.svg"),
+                        .attribute(named: "media", value: "(prefers-color-scheme: dark)")
+                    ]),
+                    .selfClosedElement(named: "img", attributes: [
+                        .attribute(named: "src", value: "/StevenPaulJobsTheme/img/\(site.download.state.description)-mac-app-store/us-uk/black.svg"),
+                    ])
+                ])
             ),
             .div(
                 .img(
@@ -200,72 +242,72 @@ private extension Node where Context == HTML.BodyContext {
             )
         )
     }
-
-    static func itemList<T: Website>(for items: [Item<T>], on site: T) -> Node {
-        return .ul(
-            .class("item-list"),
-            .forEach(items) { item in
-                .li(.article(
-                    .h1(.a(
-                        .href(item.path),
-                        .text(item.title)
-                    )),
-                    .tagList(for: item, on: site),
-                    .p(.text(item.description))
-                ))
-            }
-        )
-    }
-
-    static func tagList<T: Website>(for item: Item<T>, on site: T) -> Node {
-        return .ul(.class("tag-list"), .forEach(item.tags) { tag in
-            .li(.a(
-                .href(site.path(for: tag)),
-                .text(tag.string)
-            ))
-        })
+    
+    
+    
+    static func features<T: Website>(for site: T) -> Node {
+        return .element(named: "", nodes: [
+            .header(
+                .h2(.text(site.features.title)),
+                .if(site.features.subtitle.isEmpty == false,
+                    .h4(.text(site.features.subtitle))
+                )
+            ),
+            .section(
+                .class("features max-section"),
+                .forEach(site.features.differentiators) { differentiator in
+                    .div(
+                        .h3(
+                            .span(.class("icon"), .text(differentiator.symbol)),
+                            .br(),
+                            .element(named: "small", text: differentiator.title)
+                        ),
+                        .p(.text(differentiator.description)),
+                        .if(differentiator.href != nil,
+                            .a(
+                                .href(differentiator.href ?? ""),
+                                .text("Learn More "),
+                                .span(.class("icon"), .text("􀄯"))
+                            )
+                        )
+                    )
+                }
+            )
+        ])
     }
     
-
     static func brands<T: Website>(for site: T) -> Node {
-        let newsshield = site as! Newsshield
         return .element(named: "", nodes: [
-        .header(
-             .h2(.text(newsshield.brands.title)),
-             .if(newsshield.brands.subtitle.isEmpty == false,
-                 .h4(.text(newsshield.brands.subtitle))
-             )
-         ),
-         .section(
-             .class("brands"),
-             .forEach(newsshield.brands.sources) { source in
-                 .div(
-                     .element(named: "picture", nodes: [
-                         .selfClosedElement(named: "source", attributes: [
-                             .attribute(named: "src", value: "/img/dark/source/\(source).png"),
-                             .attribute(named: "srcset", value: "/img/dark/source/\(source)@2x.png 2x"),
-                             .attribute(named: "media", value: "(prefers-color-scheme: dark)")
-                         ]),
-                         .selfClosedElement(named: "img", attributes: [
-                             .attribute(named: "class", value: "brand-image"),
-                             .attribute(named: "src", value: "/img/light/source/\(source).png"),
-                             .attribute(named: "srcset", value: "/img/light/source/\(source)@2x.png 2x")
-                         ])
-                     ])
-
-                 )
-             }
-             
-         )
-        
+            .header(
+                .h2(.text(site.brands.title)),
+                .if(site.brands.subtitle.isEmpty == false,
+                    .h4(.text(site.brands.subtitle))
+                )
+            ),
+            .section(
+                .class("brands"),
+                .forEach(site.brands.sources) { source in
+                    .div(
+                        .element(named: "picture", nodes: [
+                            .selfClosedElement(named: "source", attributes: [
+                                .attribute(named: "src", value: "/img/dark/source/\(source).png"),
+                                .attribute(named: "srcset", value: "/img/dark/source/\(source)@2x.png 2x"),
+                                .attribute(named: "media", value: "(prefers-color-scheme: dark)")
+                            ]),
+                            .selfClosedElement(named: "img", attributes: [
+                                .attribute(named: "class", value: "brand-image"),
+                                .attribute(named: "src", value: "/img/light/source/\(source).png"),
+                                .attribute(named: "srcset", value: "/img/light/source/\(source)@2x.png 2x")
+                            ])
+                        ])
+                        
+                    )
+                }
+            )
         ])
- 
-            
-        
     }
-
+    
     static func footer<T: Website>(for site: T) -> Node {
-        let newsshield = site as! Newsshield
         return .footer(
             .a(.href("/"), .text("Home")),
             .text(" • "),
@@ -277,7 +319,7 @@ private extension Node where Context == HTML.BodyContext {
             .text(" • "),
             .a(.href("/privacy"), .text("Privacy")),
             .br(),
-            .element(named: "small", text: newsshield.copyright)
+            .element(named: "small", text: site.copyright)
         )
     }
 }

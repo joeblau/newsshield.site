@@ -8,12 +8,14 @@ let package = Package(
         .executable(name: "Newsshield", targets: ["Newsshield"])
     ],
     dependencies: [
-        .package(url: "https://github.com/johnsundell/publish.git", from: "0.1.0")
+        .package(url: "https://github.com/johnsundell/publish.git", from: "0.1.0"),
+        .package(url: "https://github.com/getshields/steven-paul-jobs-theme.git", from: "0.0.7")
     ],
     targets: [
         .target(
             name: "Newsshield",
-            dependencies: ["Publish"]
+            dependencies: ["Publish",
+                           "StevenPaulJobsTheme"]
         )
     ]
 )
